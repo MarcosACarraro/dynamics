@@ -1,0 +1,13 @@
+﻿################################################################################
+# Este arquivo .gitignore foi criado automaticamente pelo Microsoft(R) Visual Studio.
+################################################################################
+
+/TreinamentoExtending/obj/Debug
+/TreinamentoExtending/bin/Debug
+/Plugin/bin/Debug
+/Plugin/obj/Debug
+/JavaScript/bin/Debug
+/JavaScript/obj/Debug
+/ClassLibrary1/bin/Debug
+/ClassLibrary1/obj/Debug
+/.vs/TreinamentoExtending/v16/Server/sqlite3
