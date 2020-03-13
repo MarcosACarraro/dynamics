@@ -13,9 +13,12 @@ using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Metadata;
 using System.Net;
 
-namespace TreinamentoExtending {
-    class Program {
-        static void Main(string[] args) {
+namespace TreinamentoExtending
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
             Conexao conexao = new Conexao();
             var serviceProxy = conexao.Obter();
 
@@ -39,11 +42,139 @@ namespace TreinamentoExtending {
 
             //FetchXML(serviceProxy);
 
-            FetchXMLAggregate(serviceProxy);
+            //FetchXMLAggregate(serviceProxy);
+
+            //ExecuteAssign(serviceProxy);
+
+            //CriarEntidade(serviceProxy);
+
+            //CriarAtributo(serviceProxy);
+
+            RetrieveAtributo(serviceProxy);
 
             Console.ReadKey();
         }
 
+        static void RetrieveAtributo(OrganizationServiceProxy serviceProxy)
+        {
+            RetrieveAttributeRequest ret = new RetrieveAttributeRequest();
+            ret.LogicalName = "industrycode";
+            ret.EntityLogicalName = "account";
+            ret.RetrieveAsIfPublished = true;
+
+            RetrieveAttributeResponse resp = (RetrieveAttributeResponse)serviceProxy.Execute(ret);
+            PicklistAttributeMetadata pam = (PicklistAttributeMetadata)resp.AttributeMetadata;
+
+            foreach (var option in pam.OptionSet.Options)
+            {
+                Console.WriteLine(string.Format("{0} - {1}", option.Value.ToString(), option.Label.UserLocalizedLabel.Label.ToString()));
+            }
+        }
+
+        static void CriarAtributo(OrganizationServiceProxy serviceProxy)
+        {
+            CreateAttributeRequest create = new CreateAttributeRequest
+            {
+                EntityName = "new_bankaccount",
+                Attribute = new DateTimeAttributeMetadata
+                {
+                    SchemaName = "new_checkeddate",
+                    RequiredLevel = new AttributeRequiredLevelManagedProperty(AttributeRequiredLevel.None),
+                    Format = DateTimeFormat.DateOnly,
+                    DisplayName = new Label("Date", 1033),
+                    Description = new Label("The Date the account balance was last confirmed", 1033),
+                }
+            };
+
+            try
+            {
+                serviceProxy.Execute(create);
+                Console.WriteLine("Atributo criado com sucesso!!");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Erro ao criar Atributo:" + ex.Message.ToString());
+            }
+        }
+        static void CriarEntidade(OrganizationServiceProxy serviceProxy)
+        {
+            CreateEntityRequest createRequest = new CreateEntityRequest
+            {
+                Entity = new EntityMetadata
+                {
+                    SchemaName = "new_bankaccount",
+                    DisplayName = new Label("Bank Account", 1033),
+                    DisplayCollectionName = new Label("Bank Accounts", 1033),
+                    Description = new Label("An Entity to store information about customer bank accounts", 1033),
+                    OwnershipType = OwnershipTypes.UserOwned,
+                    IsActivity = false
+                },
+                PrimaryAttribute = new StringAttributeMetadata
+                {
+                    SchemaName = "new_accountname",
+                    RequiredLevel = new AttributeRequiredLevelManagedProperty(AttributeRequiredLevel.None),
+                    MaxLength = 100,
+                    FormatName = StringFormatName.Text,
+                    DisplayName = new Label("Account Name", 1033),
+                    Description = new Label("The primary attribute for the ank Account entity", 1033),
+                }
+            };
+
+            try
+            {
+                serviceProxy.Execute(createRequest);
+                Console.WriteLine("Entidade criada com sucesso!!");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Erro ao criar Entidade:" + ex.Message.ToString());
+                throw;
+            }
+        }
+        static void ExecuteAssign(OrganizationServiceProxy serviceProxy)
+        {
+            Guid systemuserid = Guid.Empty;
+            EntityReference alvo = new EntityReference();
+
+            QueryExpression queryExpression = new QueryExpression("systemuser");
+            queryExpression.Criteria.AddCondition("fullname", ConditionOperator.BeginsWith, "Marcos");
+            queryExpression.ColumnSet = new ColumnSet(true);
+            EntityCollection colecaoEntidades = serviceProxy.RetrieveMultiple(queryExpression);
+
+            if (colecaoEntidades.Entities != null && colecaoEntidades.Entities.Count > 0)
+            {
+
+                systemuserid = colecaoEntidades[0].Id;
+
+                EntityReference dono = new EntityReference("systemuser", systemuserid);
+
+                queryExpression = new QueryExpression("account");
+                queryExpression.Criteria.AddCondition("name", ConditionOperator.BeginsWith, "Alpine");
+                queryExpression.ColumnSet = new ColumnSet(true);
+
+                colecaoEntidades = serviceProxy.RetrieveMultiple(queryExpression);
+
+                if (colecaoEntidades.Entities != null && colecaoEntidades.Entities.Count > 0)
+                {
+                    foreach (var item in colecaoEntidades.Entities)
+                    {
+                        try
+                        {
+                            alvo = new EntityReference("account", item.Id);
+                            AssignRequest assignRequest = new AssignRequest();
+                            assignRequest.Assignee = dono;
+                            assignRequest.Target = alvo;
+                            AssignResponse response = (AssignResponse)serviceProxy.Execute(assignRequest);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.Message.ToString());
+                        }
+                    }
+                }
+
+            }
+        }
         static void FetchXMLAggregate(OrganizationServiceProxy serviceProxy)
         {
             StringBuilder query = new StringBuilder();
@@ -112,7 +243,7 @@ namespace TreinamentoExtending {
                              where ((string)a["firstname"]) == "Benno"
                              select a;
 
-            foreach(var item in resultados)
+            foreach (var item in resultados)
             {
                 item.Attributes["firstname"] = "Marcos";
                 context.UpdateObject(item);
@@ -140,13 +271,15 @@ namespace TreinamentoExtending {
                              join b in context.CreateQuery("account")
                                     on a["contactid"] equals b["primarycontactid"]
                              where ((string)b["address1_city"]) == "Seattle"
-                             select new{ 
-                                retorno = new { 
-                                    FirstName = a["firstname"],
-                                    LastName =a["lastname"],
-                                    NomeConta = b["name"],
-                                    Cidade = b["address1_city"]
-                                }
+                             select new
+                             {
+                                 retorno = new
+                                 {
+                                     FirstName = a["firstname"],
+                                     LastName = a["lastname"],
+                                     NomeConta = b["name"],
+                                     Cidade = b["address1_city"]
+                                 }
                              };
 
             foreach (var item in resultados)
@@ -199,7 +332,8 @@ namespace TreinamentoExtending {
                     {
                         Console.WriteLine(String.Format("Nome Contato      : {0}", ((AliasedValue)item["Contato.firstname"]).Value));
                         Console.WriteLine(String.Format("Sobrenome Contato : {0}", ((AliasedValue)item["Contato.lastname"]).Value));
-                    }else
+                    }
+                    else
                     {
                         Console.WriteLine("Nome Contato      : ");
                         Console.WriteLine("Sobrenome Contato : ");
@@ -226,14 +360,14 @@ namespace TreinamentoExtending {
 
                 if (RegistroRetorno.Attributes.Contains("name"))
                 {
-                    RegistroRetorno.Attributes["name"] = "Treinamento" + (i+1).ToString();
+                    RegistroRetorno.Attributes["name"] = "Treinamento" + (i + 1).ToString();
                 }
                 else
                 {
                     RegistroRetorno.Attributes.Add("name", "meu valor");
                 }
 
-                if(RegistroRetorno.Attributes.Contains("parentaccountid"))
+                if (RegistroRetorno.Attributes.Contains("parentaccountid"))
                 {
                     Guid parentaccountid = new Guid("d2a19cdd-88df-e311-b8e5-6c3be5a8b200");
                     EntityReference reference = new EntityReference("account", parentaccountid);
@@ -254,19 +388,19 @@ namespace TreinamentoExtending {
             {
                 Guid registro = new Guid();
                 Entity entidade = new Entity("account");
-                entidade.Attributes.Add("name","Treinamento"+ i.ToString());
+                entidade.Attributes.Add("name", "Treinamento" + i.ToString());
                 entidade.Attributes.Add("telephone1", "0000-0000");
                 entidade.Attributes.Add("address1_city", "São Paulo");
                 Guid contactid = new Guid("4ba0e5b9-88df-e311-b8e5-6c3be5a8b200");
 
-                EntityReference reference = new EntityReference("contact",contactid);
+                EntityReference reference = new EntityReference("contact", contactid);
 
                 entidade.Attributes.Add("primarycontactid", reference);
-                
+
 
                 registro = serviceProxy.Create(entidade);
 
-                if(registro !=Guid.Empty)
+                if (registro != Guid.Empty)
                 {
                     Console.WriteLine(registro.ToString());
                 }
