@@ -1,0 +1,8 @@
+HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\.NETFramework\v4.0.30319
+criar -- “SchUseStrongCrypto”=dword:00000001 - botão direito/new/DWORD(32-BIT)
+
+ 
+
+HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\.NETFramework\v4.0.30319
+
+criar -- “SchUseStrongCrypto”=dword:00000001 - botão direito/new/DWORD(32-BIT)
