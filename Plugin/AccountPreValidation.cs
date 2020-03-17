@@ -23,7 +23,7 @@ namespace Plugin
 
             if (!entidadeConexto.Contains("primarycontactid"))
                 throw new InvalidPluginExecutionException(OperationStatus.Failed, "Contato relacionado obrigatório!!");
-
+   
         }
     }
 }

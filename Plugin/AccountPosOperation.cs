@@ -26,8 +26,8 @@ namespace Plugin
                 if (context.InputParameters.Contains("Target"))
                     entidadeContexto = (Entity)context.InputParameters["Target"];
 
-                if (context.PreEntityImages.Contains("preImagen"))
-                    entidadePre = (Entity)context.PreEntityImages["preImagen"];
+                if (context.PreEntityImages.Contains("preImagem"))
+                    entidadePre = (Entity)context.PreEntityImages["preImagem"];
 
                 if (entidadeContexto == null || entidadePre == null)
                     return;
@@ -35,7 +35,44 @@ namespace Plugin
                 if ((entidadeContexto.Contains("primarycontactid") && entidadePre.Contains("primarycontactid")) &&
                     (entidadeContexto["primarycontactid"]) != (entidadePre["primarycontactid"]))
                     throw new InvalidPluginExecutionException("Não é possivel altear o contato primário");
+
+            }
+            else if (context.MessageName.ToLower() == "create" &&
+                      context.Mode == Convert.ToInt32(MeuEnum.Mode.Synchronous) &&
+                      context.Stage == Convert.ToInt32(MeuEnum.Stage.PreOperation))
+            {
+                IOrganizationServiceFactory factory = (IOrganizationServiceFactory)serviceProvider.GetService(typeof(IOrganizationServiceFactory));
+
+                var serviceProsxyUserService = factory.CreateOrganizationService(context.UserId);
+
+                Entity entidadeContexto = null;
+
+                if (context.InputParameters.Contains("Target"))
+                    entidadeContexto = (Entity)context.InputParameters["Target"];
+                {
+
+                    if (entidadeContexto != null)
+                    {
+
+                        Guid contactid = new Guid();
+                        Entity entidade = new Entity("contact");
+                        entidade.Attributes.Add("firstname", string.Format("Contato - > {0}", DateTime.Now.ToString("dd/MM/yyyy")));
+                        entidade.Attributes.Add("lasttname", "Sobrenome");
+
+                        contactid = serviceProsxyUserService.Create(entidade);
+
+                        if (contactid != Guid.Empty)
+                        {
+                            EntityReference reference = new EntityReference("contact", contactid);
+
+                            entidadeContexto.Attributes.Add("primarycontactid", reference);
+
+                        }
+
+                    }
+                }
             }
         }
+
     }
 }
