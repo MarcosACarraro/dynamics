@@ -57,7 +57,7 @@ namespace Plugin
                         Guid contactid = new Guid();
                         Entity entidade = new Entity("contact");
                         entidade.Attributes.Add("firstname", string.Format("Contato - > {0}", DateTime.Now.ToString("dd/MM/yyyy")));
-                        entidade.Attributes.Add("lasttname", "Sobrenome");
+                        entidade.Attributes.Add("lastname", "Sobrenome");
 
                         contactid = serviceProsxyUserService.Create(entidade);
 
