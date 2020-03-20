@@ -52,6 +52,8 @@
   <ItemGroup>
     <Compile Include="AccountPosOperation.cs" />
     <Compile Include="AccountPreValidation.cs" />
+    <Compile Include="ContactPreOperation.cs" />
+    <Compile Include="ContactPreValidation.cs" />
     <Compile Include="MeuEnum.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -1,0 +1,17 @@
+Criar campo CNPJ na entidade Conta e um Plugin de Pré Validation 
+para impedir cadastramento de de Contas 
+com CNPJ duplicados.
+
+Criar campo CPF na entidade Contato e um Plugin de Pré Validation 
+para impedir cadastramento de de Contaos com CPF duplicados.
+
+Impedir a exclusão de Contatos associados a uma conta como contato primário.
+
+Quando criar conta 
+
+Ir na entidade account e inserir no campo CNPJ um valor identico para vários registros de conta. 
+
+Feito isso criar um WF Assembly que ao inserir o mesmo valor de cnpj no campo, 
+incluir este contato como Primários em todas as contas.
+
+
