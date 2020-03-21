@@ -79,3 +79,30 @@ function CriarContatoAjax()
 	});
 }
 
+
+function UpdateContato(contactId)
+{
+	var data ={"firstname":"Marcos","lastname":"Carraro"};
+	
+	Xrm.WebApi.updateRecord("contact",contactId,data).then(
+        function success(result) {
+            Retrieve(result.id);
+        },
+        function (error) {
+            alert(error.message);
+        }
+	);
+}
+
+
+function DeleteContato(contactId)
+{
+	Xrm.WebApi.deleteRecord("contact",contactId).then(
+        function success(result) {
+            console.table(result);
+        },
+        function (error) {
+            alert(error.message);
+        }
+	);
+}
